@@ -61,10 +61,25 @@ begin
         variable comp_a  :  unsigned(COMP_HIGH-COMP_LOW downto 0);
         variable comp_b  :  unsigned(COMP_HIGH-COMP_LOW downto 0);
         variable a_gt_b  :  boolean;
+        variable res     : unsigned(COMP_HIGH-COMP_LOW downto 0);
+        variable ena, enb   : std_logic;
+
     begin
         comp_a := unsigned(I_A(COMP_HIGH downto COMP_LOW));
         comp_b := unsigned(I_B(COMP_HIGH downto COMP_LOW));
-        a_gt_b := (comp_a > comp_b);
+        
+        ena    := I_A(I_A'left);
+        enb    := I_B(I_B'left);
+        res    := comp_a - comp_b;
+
+        if ena = enb then
+            a_gt_b := (res(res'left) = '0');
+        elsif (ena = '1') then
+            a_gt_b  := TRUE;
+        else
+            a_gt_b  := FALSE;
+        end if;
+
         if (I_SORT = '1' and I_UP = '1' and a_gt_b = TRUE ) or
            (I_SORT = '1' and I_UP = '0' and a_gt_b = FALSE) then
             O_A <= I_B;

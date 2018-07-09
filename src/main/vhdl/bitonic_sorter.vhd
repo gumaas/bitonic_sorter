@@ -45,7 +45,6 @@ entity  Bitonic_Sorter is
         INFO_BITS :  integer :=  4
     );
     port (
-        CLK       :  in  std_logic;
         RST       :  in  std_logic;
         CLR       :  in  std_logic;
         I_SORT    :  in  std_logic;
@@ -61,50 +60,7 @@ end Bitonic_Sorter;
 library ieee;
 use     ieee.std_logic_1164.all;
 architecture RTL of Bitonic_Sorter is
-    component Bitonic_Sorter
-        generic (
-            WORDS     :  integer :=  1;
-            WORD_BITS :  integer := 64;
-            COMP_HIGH :  integer := 63;
-            COMP_LOW  :  integer := 32;
-            INFO_BITS :  integer :=  4
-        );
-        port (
-            CLK       :  in  std_logic;
-            RST       :  in  std_logic;
-            CLR       :  in  std_logic;
-            I_SORT    :  in  std_logic;
-            I_UP      :  in  std_logic;
-            I_DATA    :  in  std_logic_vector(WORDS*WORD_BITS-1 downto 0);
-            I_INFO    :  in  std_logic_vector(      INFO_BITS-1 downto 0);
-            O_SORT    :  out std_logic;
-            O_UP      :  out std_logic;
-            O_DATA    :  out std_logic_vector(WORDS*WORD_BITS-1 downto 0);
-            O_INFO    :  out std_logic_vector(      INFO_BITS-1 downto 0)
-        );
-    end component;
-    component Bitonic_Merge
-        generic (
-            WORDS     :  integer :=  1;
-            WORD_BITS :  integer := 64;
-            COMP_HIGH :  integer := 63;
-            COMP_LOW  :  integer := 32;
-            INFO_BITS :  integer :=  4
-        );
-        port (
-            CLK       :  in  std_logic;
-            RST       :  in  std_logic;
-            CLR       :  in  std_logic;
-            I_SORT    :  in  std_logic;
-            I_UP      :  in  std_logic;
-            I_DATA    :  in  std_logic_vector(WORDS*WORD_BITS-1 downto 0);
-            I_INFO    :  in  std_logic_vector(      INFO_BITS-1 downto 0);
-            O_SORT    :  out std_logic;
-            O_UP      :  out std_logic;
-            O_DATA    :  out std_logic_vector(WORDS*WORD_BITS-1 downto 0);
-            O_INFO    :  out std_logic_vector(      INFO_BITS-1 downto 0)
-        );
-    end component;
+
 begin
     ONE: if (WORDS <= 1) generate
         O_DATA <= I_DATA;
@@ -121,9 +77,8 @@ begin
     begin
         s_info(UP_POS      ) <= I_UP;
         s_info(I_INFO'range) <= I_INFO;
-        FIRST : Bitonic_Sorter generic map (WORDS/2, WORD_BITS, COMP_HIGH, COMP_LOW, s_info'length)
+        FIRST : entity work.Bitonic_Sorter generic map (WORDS/2, WORD_BITS, COMP_HIGH, COMP_LOW, s_info'length)
             port map (
-                CLK     => CLK,
                 RST     => RST,
                 CLR     => CLR,
                 I_SORT  => I_SORT,
@@ -135,9 +90,8 @@ begin
                 O_INFO  => q_info,
                 O_DATA  => q_data(WORD_BITS*(WORDS/2)-1 downto WORD_BITS*0)
             );
-        SECOND: Bitonic_Sorter generic map (WORDS/2, WORD_BITS, COMP_HIGH, COMP_LOW, s_info'length)
+        SECOND: entity work.Bitonic_Sorter generic map (WORDS/2, WORD_BITS, COMP_HIGH, COMP_LOW, s_info'length)
             port map (
-                CLK     => CLK,
                 RST     => RST,
                 CLR     => CLR,
                 I_SORT  => I_SORT,
@@ -149,9 +103,8 @@ begin
                 O_INFO  => open,
                 O_DATA  => q_data(WORD_BITS*(WORDS)-1 downto WORD_BITS*(WORDS/2))
             );
-        MERGE : Bitonic_Merge  generic map (WORDS  , WORD_BITS, COMP_HIGH, COMP_LOW, INFO_BITS)
+        MERGE : entity work.Bitonic_Merge  generic map (WORDS  , WORD_BITS, COMP_HIGH, COMP_LOW, INFO_BITS)
             port map (
-                CLK     => CLK,
                 RST     => RST,
                 CLR     => CLR,
                 I_SORT  => q_sort,
