@@ -83,6 +83,18 @@ architecture MODEL of TEST_BENCH_BSN is
     signal  src_vec_sig         :  INTEGER_VECTOR;
     signal  exp_vec_sig         :  INTEGER_VECTOR;
     signal  res_sig         :  INTEGER_VECTOR;
+
+    ---------------------------------------------------------------------------
+        --
+        ---------------------------------------------------------------------------
+        function  TO_INTEGER_VECTOR(DATA:std_logic_vector) return INTEGER_VECTOR is
+            variable     ivec :  INTEGER_VECTOR;
+        begin
+            for i in 0 to WORDS-1 loop
+                ivec(i) := to_integer(unsigned(DATA(WORD_BITS*(i+1)-1-1 downto WORD_BITS*i)));
+            end loop;
+            return ivec;
+        end function;
 begin
     -------------------------------------------------------------------------------
     --
@@ -107,6 +119,9 @@ begin
             O_DATA    => O_DATA       , -- Out :
             O_INFO    => O_INFO         -- Out :
         );
+
+    res_sig <= TO_INTEGER_VECTOR(O_DATA);
+
     -------------------------------------------------------------------------------
     -- 
     -------------------------------------------------------------------------------
@@ -133,17 +148,7 @@ begin
             end loop;
             return data;
         end function;
-        ---------------------------------------------------------------------------
-        --
-        ---------------------------------------------------------------------------
-        function  TO_INTEGER_VECTOR(DATA:std_logic_vector) return INTEGER_VECTOR is
-            variable     ivec :  INTEGER_VECTOR;
-        begin
-            for i in 0 to WORDS-1 loop
-                ivec(i) := to_integer(unsigned(DATA(WORD_BITS*(i+1)-1-1 downto WORD_BITS*i)));
-            end loop;
-            return ivec;
-        end function;
+        
         ---------------------------------------------------------------------------
         --
         ---------------------------------------------------------------------------
@@ -154,7 +159,7 @@ begin
             end loop;
         end WAIT_CLK;
 
-        res_sig <= TO_INTEGER_VECTOR(O_DATA);
+
         ---------------------------------------------------------------------------
         --
         ---------------------------------------------------------------------------
@@ -170,17 +175,14 @@ begin
             src_vec_sig     <= SRC;
             exp_vec_sig     <= EXP;
             
-            --wait until (O_EVENT'event and O_EVENT = '1');
-            --I_INFO <= "0000";
-            --I_DATA <= (others => '0');
-            --I_SORT <= '0';
-            --I_UP   <= '0';
+            wait for 10 ns;
 
-            result := 
-            res_sig     <= result;
-            --assert(result  = EXP  ) report "Mismatch..." severity FAILURE;
+            result      := TO_INTEGER_VECTOR(O_DATA);
+            assert(result  = EXP  ) report "Mismatch..." severity FAILURE;
         end procedure;
     begin
+
+       
         ---------------------------------------------------------------------------
         --
         ---------------------------------------------------------------------------
@@ -191,9 +193,11 @@ begin
         I_INFO <= (others => '0');
         I_SORT <= '0';
         I_UP   <= '0';
-        WAIT_CLK(10);
+        wait for 100 ns;
+        
         RST    <= '0';
-        WAIT_CLK(10);
+
+        wait for 100 ns;
         ---------------------------------------------------------------------------
         --
         ---------------------------------------------------------------------------
@@ -203,7 +207,7 @@ begin
 
         TEST('0', '0', src_vec, exp_vec, "00111111");
 
-        WAIT_CLK(1);
+         wait for 10 ns;
 
         ---------------------------------------------------------------------------
         --
@@ -212,7 +216,7 @@ begin
         exp_vec := (0 => 9, 1 => 8, 2 => 6, 3 => 2, 4 => 1, 5 => 1, 6 => 1, 7 => 0);
 
         TEST('1', '0', src_vec, exp_vec, "11111111");
-        WAIT_CLK(1);
+        wait for 10 ns;
         
         ---------------------------------------------------------------------------
         --
@@ -220,8 +224,8 @@ begin
         src_vec := (0 => 8, 1 => 1, 2 => 0, 3 => 6, 4 => 1, 5 => 2, 6 => 9, 7 => 1);
         exp_vec := (0 => 0, 1 => 1, 2 => 1, 3 => 1, 4 => 2, 5 => 6, 6 => 8, 7 => 9);
 
-        TEST('1', '1', src_vec, exp_vec, "11000011");
-        WAIT_CLK(1);
+        TEST('1', '1', src_vec, exp_vec, "11111111");
+        wait for 10 ns;
 
         ---------------------------------------------------------------------------
         --
@@ -229,8 +233,8 @@ begin
         src_vec := (0 => 0, 1 => 1, 2 => 255, 3 => 250, 4 => 10, 5 => 200, 6 => 10, 7 => 13);
         exp_vec := (0 => 200, 1 => 250, 2 => 255, 3 => 0, 4 => 1, 5 => 10, 6 => 10, 7 => 13);
 
-        TEST('1', '1', src_vec, exp_vec, "11010011");
-        WAIT_CLK(1);
+        TEST('1', '1', src_vec, exp_vec, "11111111");
+        wait for 10 ns;
 
 
         ---------------------------------------------------------------------------
@@ -239,8 +243,8 @@ begin
         src_vec := (0 => 250, 1 => 200, 2 => 230, 3 => 180, 4 => 190, 5 => 220, 6 => 150, 7 => 240);
         exp_vec := (0 => 150, 1 => 180, 2 => 190, 3 => 200, 4 => 220, 5 => 230, 6 => 240, 7 => 250);
 
-        TEST('1', '1', src_vec, exp_vec, "11001100");
-        WAIT_CLK(1);
+        TEST('1', '1', src_vec, exp_vec, "11111111");
+        wait for 10 ns;
 
 
         ---------------------------------------------------------------------------
@@ -249,8 +253,8 @@ begin
         src_vec := (0 => 250, 1 => 200, 2 => 230, 3 => 180, 4 => 190, 5 => 220, 6 => 0, 7 => 240);
         exp_vec := (0 => 180, 1 => 190, 2 => 200, 3 => 220, 4 => 230, 5 => 240, 6 => 250, 7 => 0);
 
-        TEST('1', '1', src_vec, exp_vec, "11110000");
-        WAIT_CLK(1);
+        TEST('1', '1', src_vec, exp_vec, "11111111");
+        wait for 10 ns;
 
 
 
