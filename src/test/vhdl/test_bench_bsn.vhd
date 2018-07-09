@@ -63,8 +63,6 @@ architecture MODEL of TEST_BENCH_BSN is
     -------------------------------------------------------------------------------
     --
     -------------------------------------------------------------------------------
-    signal   CLK             :  std_logic;
-    signal   RST             :  std_logic;
     signal   CLR             :  std_logic;
     signal   I_SORT          :  std_logic;
     signal   I_UP            :  std_logic;
@@ -108,8 +106,6 @@ begin
             INFO_BITS => INFO_BITS      --
         )                               -- 
         port map (                      -- 
-            RST       => RST          , -- In  :
-            CLR       => CLR          , -- In  :
             I_SORT    => I_SORT       , -- In  :
             I_UP      => I_UP         , -- In  :
             I_DATA    => I_DATA       , -- In  :
@@ -122,15 +118,6 @@ begin
 
     res_sig <= TO_INTEGER_VECTOR(O_DATA);
 
-    -------------------------------------------------------------------------------
-    -- 
-    -------------------------------------------------------------------------------
-    process begin
-        CLK <= '0';
-        wait for CLOCK_PERIOD / 2;
-        CLK <= '1';
-        wait for CLOCK_PERIOD / 2;
-    end process;
     -------------------------------------------------------------------------------
     -- 
     -------------------------------------------------------------------------------
@@ -149,16 +136,6 @@ begin
             return data;
         end function;
         
-        ---------------------------------------------------------------------------
-        --
-        ---------------------------------------------------------------------------
-        procedure WAIT_CLK(CNT:in integer) is
-        begin
-            for i in 1 to CNT loop 
-                wait until (CLK'event and CLK = '1'); 
-            end loop;
-        end WAIT_CLK;
-
 
         ---------------------------------------------------------------------------
         --
@@ -187,17 +164,12 @@ begin
         --
         ---------------------------------------------------------------------------
         assert(false) report "Run Start..." severity NOTE;
-        RST    <= '1';
-        CLR    <= '0';
         I_DATA <= (others => '0');
         I_INFO <= (others => '0');
         I_SORT <= '0';
         I_UP   <= '0';
         wait for 100 ns;
         
-        RST    <= '0';
-
-        wait for 100 ns;
         ---------------------------------------------------------------------------
         --
         ---------------------------------------------------------------------------
@@ -254,12 +226,11 @@ begin
         exp_vec := (0 => 180, 1 => 190, 2 => 200, 3 => 220, 4 => 230, 5 => 240, 6 => 250, 7 => 0);
 
         TEST('1', '1', src_vec, exp_vec, "11111111");
-        wait for 10 ns;
+        wait for 100 ns;
 
 
 
 
-        WAIT_CLK(10);
         assert(false) report "Run complete..." severity FAILURE;
         wait;
     end process;

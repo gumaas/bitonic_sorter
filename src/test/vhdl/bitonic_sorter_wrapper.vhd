@@ -9,8 +9,6 @@ entity  Bitonic_Sorter_Wrapper is
         INFO_BITS :  integer :=  4
     );
     port (
-        CLK       :  in  std_logic;
-        RST       :  in  std_logic;
         CLR       :  in  std_logic;
         I_SORT    :  in  std_logic;
         I_UP      :  in  std_logic;
@@ -35,8 +33,6 @@ architecture RTL of Bitonic_Sorter_Wrapper is
             INFO_BITS :  integer :=  4
         );
         port (
-            CLK       :  in  std_logic;
-            RST       :  in  std_logic;
             CLR       :  in  std_logic;
             I_SORT    :  in  std_logic;
             I_UP      :  in  std_logic;
@@ -51,21 +47,23 @@ architecture RTL of Bitonic_Sorter_Wrapper is
     signal  s_data    :  std_logic_vector(WORDS*WORD_BITS-1 downto 0);
     signal  q_data    :  std_logic_vector(WORDS*WORD_BITS-1 downto 0);
 begin
-    process(CLK, RST) begin
-        if (RST = '1') then
-                s_data <= (others => '0');
-        elsif (CLK'event and CLK = '1') then
-            if (CLR = '1') then
-                s_data <= (others => '0');
-            else
-                for i in 0 to WORDS-1 loop
-                    if (I_ADDR = i) then
-                        s_data(WORD_BITS*(i+1)-1 downto WORD_BITS*i) <= I_DATA;
-                    end if;
-                end loop;
+
+    process(I_ADDR, I_DATA) begin
+        for i in 0 to WORDS-1 loop
+            if (I_ADDR = i) then
+                s_data(WORD_BITS*(i+1)-1 downto WORD_BITS*i) <= I_DATA;
             end if;
-        end if;
+        end loop;
     end process;
+    
+    process(O_ADDR, q_data) begin
+        for i in 0 to WORDS-1 loop
+            if (O_ADDR = i) then
+                O_DATA <= q_data(WORD_BITS*(i+1)-1 downto WORD_BITS*i);
+            end if;
+        end loop;
+    end process;
+    
     U: Bitonic_Sorter
         generic map (
             WORDS     => WORDS     , -- 
@@ -75,9 +73,6 @@ begin
             INFO_BITS => INFO_BITS   -- 
         )
         port map (
-            CLK       => CLK       , -- 
-            RST       => RST       , -- 
-            CLR       => CLR       , -- 
             I_SORT    => I_SORT    , -- 
             I_UP      => I_UP      , -- 
             I_DATA    => s_data    , -- 
@@ -87,19 +82,5 @@ begin
             O_DATA    => q_data    , -- 
             O_INFO    => O_INFO      -- 
         );
-    process(CLK, RST) begin
-        if (RST = '1') then
-                O_DATA <= (others => '0');
-        elsif (CLK'event and CLK = '1') then
-            if (CLR = '1') then
-                O_DATA <= (others => '0');
-            else
-                for i in 0 to WORDS-1 loop
-                    if (O_ADDR = i) then
-                        O_DATA <= q_data(WORD_BITS*(i+1)-1 downto WORD_BITS*i);
-                    end if;
-                end loop;
-            end if;
-        end if;
-    end process;
+
 end RTL;

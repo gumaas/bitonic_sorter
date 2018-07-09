@@ -45,8 +45,6 @@ entity  Bitonic_Sorter is
         INFO_BITS :  integer :=  4
     );
     port (
-        RST       :  in  std_logic;
-        CLR       :  in  std_logic;
         I_SORT    :  in  std_logic;
         I_UP      :  in  std_logic;
         I_DATA    :  in  std_logic_vector(WORDS*WORD_BITS-1 downto 0);
@@ -79,8 +77,6 @@ begin
         s_info(I_INFO'range) <= I_INFO;
         FIRST : entity work.Bitonic_Sorter generic map (WORDS/2, WORD_BITS, COMP_HIGH, COMP_LOW, s_info'length)
             port map (
-                RST     => RST,
-                CLR     => CLR,
                 I_SORT  => I_SORT,
                 I_UP    => '1',
                 I_INFO  => s_info,
@@ -92,8 +88,6 @@ begin
             );
         SECOND: entity work.Bitonic_Sorter generic map (WORDS/2, WORD_BITS, COMP_HIGH, COMP_LOW, s_info'length)
             port map (
-                RST     => RST,
-                CLR     => CLR,
                 I_SORT  => I_SORT,
                 I_UP    => '0',
                 I_INFO  => s_info,
@@ -105,8 +99,6 @@ begin
             );
         MERGE : entity work.Bitonic_Merge  generic map (WORDS  , WORD_BITS, COMP_HIGH, COMP_LOW, INFO_BITS)
             port map (
-                RST     => RST,
-                CLR     => CLR,
                 I_SORT  => q_sort,
                 I_UP    => q_info(UP_POS),
                 I_INFO  => q_info(I_INFO'range),
